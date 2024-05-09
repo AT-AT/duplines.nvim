@@ -1,0 +1,231 @@
+*duplines-nvim.txt*                               Duplicate one or more lines.
+
+==============================================================================
+Contents                                                   *duplines-contents*
+
+
+1. Configuration .................................... |duplines-configuration|
+  - Options ............................................... |duplines-options|
+2. Key Mappings ...................................... |duplines-key-mappings|
+3. Lua Module (API) .................................... |duplines-lua-module|
+  - duplines .................................................. |duplines-api|
+  - line .......................................... |duplines-lua-module-line|
+4. Testing ................................................ |duplines-testing|
+
+
+==============================================================================
+1. Configuration                                      *duplines-configuration*
+
+
+This plugin can be configured by passing a table of options to the `setup()`
+|duplines-api-setup|.
+Available options are listed in the next section.
+
+Please keep in mind that this plugin ALWAYS inserts the duplicated lines
+immediately after the original lines. >
+  line-1  --(duplicate)--> line-1  (called "source range" hereafter)
+                           line-2  (called "destination range" hereafter)
+<
+However, it is POSSIBLE to make the lines appear to be duplicated directly
+above the original lines by setting options.
+
+
+                                                             *duplines-optios*
+Options ~
+
+
+                                                         *duplines-opt-target*
+  target ~
+
+    This option specifies where the `cursor` and `select` options described
+    below will be applied.
+      `src` : Both options will be applied to the source range.
+      `desc`: Both options will be applied to the destination range.
+
+    Type: `string` ~
+
+    Available: `src`, `dest` ~
+
+    Default: `dest` ~
+
+
+                                                         *duplines-opt-cursor*
+  cursor ~
+
+    This option specifies where to place the cursor within the range
+    (specified by `target` option) after duplication.
+      `keep`: The cursor is placed in the same position (relatively in the
+              case of the destination range) as when the duplication started.
+      `head`: The cursor is placed at the beginning of the first line of the
+              range.
+      `tail`: The cursor is placed at the beginning of the last line of the
+              range.
+
+    Type: `string` ~
+
+    Available: `keep`, `head`, `tail` ~
+
+    Default: `head` ~
+
+
+                                                         *duplines-opt-select*
+  select ~
+
+    This option specifies whether the range (specified by `target` option)
+    should be selected or not after duplication.
+
+    Type: `boolean` ~
+
+    Default: `false` ~
+
+
+==============================================================================
+2. Key Mappings                                        *duplines-key-mappings*
+
+
+This plugin does not provide a default keymap, and will have no effect until
+you add your own maps to it. Below is an example:
+>lua
+  -- Duplicate upwards,
+  -- place the cursor on the first row of the destination range,
+  -- and do not select the destination range.
+  vim.keymap.set({ 'n', 'x' }, '<M-UP>', function()
+    -- Options can be specified as arguments for API.line().
+    require('duplines').line(
+      { target = 'src', cursor = 'head', select = false }
+    ):duplicate()
+
+    -- Options can also be specified in configuration methods.
+    -- The following is equivalent to the above.
+    require('duplines').line():src():head():deselect():duplicate()
+  end)
+
+  -- Duplicate downwards,
+  -- place the cursor on the first row of the destination range,
+  -- and do not select the destination range.
+  vim.keymap.set({ 'n', 'x' }, '<M-DOWN>', function()
+    require('duplines').line():dest():head():deselect():duplicate()
+  end)
+<
+
+==============================================================================
+3. Lua Module (API)                                      *duplines-lua-module*
+
+
+                                                                *duplines-api*
+  Module: duplines ~
+>lua
+  local api = require('duplines')
+<
+
+                                                          *duplines-api-setup*
+  api.setup({options}) ~
+
+    Configures plugin with the provided {options}.
+    No need to execute unless you want to change the default option values.
+
+    Parameters: ~
+      {options} `{ [string]: any }?` See |duplines-options|.
+
+
+                                                           *duplines-api-line*
+  api.line({options}) ~
+
+    Generate a Line class object that performs the duplication process.
+
+    Parameters: ~
+      {options} `{ [string]: any }?` See |duplines-options|.
+
+    Returns: ~
+      `Line` A Line class object.
+
+
+                                                         *duplines-class-line*
+  Module: duplines.Line ~
+>lua
+  local line = require('duplines').line()
+<
+
+                                               *duplines-class-line-duplicate*
+  line:duplicate() ~
+
+    Duplicate the target.
+
+
+                                                     *duplines-class-line-src*
+  line:src() ~
+
+    Specify `src` to `target` option.
+
+    Returns: ~
+      `self` The line object itself (Same below).
+
+
+                                                    *duplines-class-line-dest*
+  line:dest() ~
+
+    Specify `dest` to `target` option.
+
+    Returns: ~
+      `self`
+
+
+                                                    *duplines-class-line-keep*
+  line:keep() ~
+
+    Specify `keep` to `cursor` option.
+
+    Returns: ~
+      `self`
+
+
+                                                    *duplines-class-line-head*
+  line:head() ~
+
+    Specify `head` to `cursor` option.
+
+    Returns: ~
+      `self`
+
+
+                                                    *duplines-class-line-tail*
+  line:tail() ~
+
+    Specify `tail` to `cursor` option.
+
+    Returns: ~
+      `self`
+
+
+                                                  *duplines-class-line-select*
+  line:select() ~
+
+    Specify `true` to `select` option.
+
+    Returns: ~
+      `self`
+
+
+                                                *duplines-class-line-deselect*
+  line:deselect() ~
+
+    Specify `false` to `select` option.
+
+    Returns: ~
+      `self`
+
+
+==============================================================================
+4. Testing                                                  *duplines-testing*
+
+
+Install Lua-5.1
+Install LuaRocks
+Install busted (global, https://github.com/lunarmodules/busted)
+Install vusted (global, https://github.com/notomo/vusted)
+Run vusted
+
+
+==============================================================================
+
+vim:tw=78:ts=8:noet:ft=help:norl:
