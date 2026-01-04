@@ -86,16 +86,20 @@ end
 function L.select_linewise(on, range)
   local begin_idx = {}
   local end_idx = {}
+  local cursor_pos = {}
 
   if on == const.CURSOR_POS.head then
     begin_idx = range:pos_on_tail()
     end_idx = range:pos_on_head()
+    cursor_pos = range:pos_on_tail()
   elseif on == const.CURSOR_POS.tail then
     begin_idx = range:pos_on_head()
     end_idx = range:pos_on_tail()
+    cursor_pos = range:pos_on_head()
   else
     begin_idx = range:pos_on_begin()
     end_idx = range:pos_on_end()
+    cursor_pos = range:pos_on_begin()
   end
 
   if L.is_v_line_mode then
@@ -104,7 +108,7 @@ function L.select_linewise(on, range)
 
   -- Marks "m<" and "m>" are automatically rearranged by Vim so that their coordinates are top to
   -- bottom and left to right.
-  api.nvim_win_set_cursor(0, L.to_cursor_index(begin_idx))
+  api.nvim_win_set_cursor(0, L.to_cursor_index(cursor_pos))
   local keyseq = ''
     .. L.keyseq_mark_begin_selection
     .. L.keyseq_start_vline_mode
