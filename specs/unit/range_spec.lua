@@ -4,6 +4,7 @@ local H = require('specs/helpers')
 local eq = MiniTest.expect.equality
 local has_range = H.expect.has_range
 local child = H.new_child_neovim('duplines.Range')
+local const = require('duplines.enum')
 
 -- / Module
 -- -------------------------------------------------------------------------------------------------
@@ -22,7 +23,7 @@ describe('Module.Range', function()
   describe('(on stage)', function()
 
     before_each(function()
-      child.prepare_rows('foo', 'bar', 'baz')
+      child.prepare_rows('foobarbazqux1', 'foobarbazqux2', 'foobarbazqux3', 'foobarbazqux4')
     end)
 
     -- / Subject
@@ -181,6 +182,683 @@ describe('Module.Range', function()
 
     -- / Subject
     -- ---------------------------------------------------------------------------------------------
+    describe('key_sequence()', function()
+
+      describe('can generate key sequence from current range', function()
+
+        -- / Row Number
+        -- -----------------------------------------------------------------------------------------
+        describe('on single line', function()
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('none', function()
+
+            before_each(function()
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('0 -> 0', function()
+
+            before_each(function()
+              child.type_keys('v')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('L -> R', function()
+
+            before_each(function()
+              child.type_keys('v4l')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('4l', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('R -> L', function()
+
+            before_each(function()
+              child.type_keys('4lv4h')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('4h', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('', actual)
+            end)
+
+          end)
+
+        end)
+
+        -- / Row Number
+        -- -----------------------------------------------------------------------------------------
+        describe('on multiple lines', function()
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('T -> B, 0 -> 0', function()
+
+            before_each(function()
+              child.type_keys('<S-v>3j')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('B -> T, 0 -> 0', function()
+
+            before_each(function()
+              child.type_keys('3j<S-v>3k')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('T -> B, 0 -> N', function()
+
+            before_each(function()
+              child.type_keys('<S-v>3j3l')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('3j3l', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('B -> T, 0 -> N', function()
+
+            before_each(function()
+              child.type_keys('3j<S-v>3k3l')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('3k3l', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('T -> B, N -> 0', function()
+
+            before_each(function()
+              child.type_keys('3l<S-v>3j3h')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('3h3j', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('B -> T, N -> 0', function()
+
+            before_each(function()
+              child.type_keys('3j3l<S-v>3k3h')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('3h3k', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('T -> B, N -> N', function()
+
+            before_each(function()
+              child.type_keys('3l<S-v>3j')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('B -> T, N -> N', function()
+
+            before_each(function()
+              child.type_keys('3j3l<S-v>3k')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('T -> B, M -> (<)N', function()
+
+            before_each(function()
+              child.type_keys('3l<S-v>3j3l')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('3j3l', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('B -> T, M -> (<)N', function()
+
+            before_each(function()
+              child.type_keys('3j3l<S-v>3k3l')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('3k3l', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('T -> B, M -> (>)N', function()
+
+            before_each(function()
+              child.type_keys('6l<S-v>3j3h')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('6h3j3l', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+          end)
+
+          -- / Selection
+          -- ---------------------------------------------------------------------------------------
+          describe('B -> T, M -> (>)N', function()
+
+            before_each(function()
+              child.type_keys('3j6l<S-v>3k3h')
+              child.lua([[R = SUT.from_pos()]])
+            end)
+
+            it('with keeping cursor position', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.keep .. '")')
+
+              -- Assert
+              eq('6h3k3l', actual)
+            end)
+
+            it('with placing cursor on head', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.head .. '")')
+
+              -- Assert
+              eq('3k', actual)
+            end)
+
+            it('with placing cursor on tail', function()
+              -- Arrange
+
+              -- Act
+              local actual = child.lua_get('R:key_sequence("' .. const.CURSOR_POS.tail .. '")')
+
+              -- Assert
+              eq('3j', actual)
+            end)
+
+          end)
+
+        end)
+
+      end)
+
+    end)
+
+    -- / Subject
+    -- ---------------------------------------------------------------------------------------------
     describe('pos_on_begin()', function()
 
       it('can extract position where selection actually started', function()
@@ -283,193 +961,6 @@ describe('Module.Range', function()
 
         -- Assert
         eq({ 0, 2 }, actual)
-      end)
-
-    end)
-
-    -- / Subject
-    -- ---------------------------------------------------------------------------------------------
-    describe('to_key_sequence()', function()
-
-      describe('can generate key sequence between passed two positions', function()
-
-        -- / Row Number
-        -- -----------------------------------------------------------------------------------------
-        describe('on single line', function()
-
-          it('0 -> 0', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 0, 0 }, { 0, 0 })]])
-
-            -- Assert
-            eq('', actual)
-          end)
-
-          it('L -> R', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 0, 0 }, { 0, 4 })]])
-
-            -- Assert
-            eq('4l', actual)
-          end)
-
-          it('R -> L', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 0, 4 }, { 0, 0 })]])
-
-            -- Assert
-            eq('4h', actual)
-          end)
-
-        end)
-
-        -- / Row Number
-        -- -----------------------------------------------------------------------------------------
-        describe('on multiple lines', function()
-
-          it('T -> B, 0 -> 0', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 0, 0 }, { 4, 0 })]])
-
-            -- Assert
-            eq('4j', actual)
-          end)
-
-          it('B -> T, 0 -> 0', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 4, 0 }, { 0, 0 })]])
-
-            -- Assert
-            eq('4k', actual)
-          end)
-
-          it('T -> B, 0 -> N', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 0, 0 }, { 4, 4 })]])
-
-            -- Assert
-            eq('4j4l', actual)
-          end)
-
-          it('B -> T, 0 -> N', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 4, 0 }, { 0, 4 })]])
-
-            -- Assert
-            eq('4k4l', actual)
-          end)
-
-          it('T -> B, N -> 0', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 0, 4 }, { 4, 0 })]])
-
-            -- Assert
-            eq('4h4j', actual)
-          end)
-
-          it('B -> T, N -> 0', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 4, 4 }, { 0, 0 })]])
-
-            -- Assert
-            eq('4h4k', actual)
-          end)
-
-          it('T -> B, N -> N', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 0, 2 }, { 4, 2 })]])
-
-            -- Assert
-            eq('4j', actual)
-          end)
-
-          it('B -> T, N -> N', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 4, 2 }, { 0, 2 })]])
-
-            -- Assert
-            eq('4k', actual)
-          end)
-
-          it('T -> B, M ->(<) N', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 0, 2 }, { 4, 4 })]])
-
-            -- Assert
-            eq('4j2l', actual)
-          end)
-
-          it('B -> T, M ->(<) N', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 4, 2 }, { 0, 4 })]])
-
-            -- Assert
-            eq('4k2l', actual)
-          end)
-
-          it('T -> B, M ->(>) N', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 0, 4 }, { 4, 2 })]])
-
-            -- Assert
-            eq('4h4j2l', actual)
-          end)
-
-          it('B -> T, M ->(>) N', function()
-            -- Arrange
-            child.lua([[R = SUT.from_pos()]])
-
-            -- Act
-            local actual = child.lua_get([[R:to_key_sequence({ 4, 4 }, { 0, 2 })]])
-
-            -- Assert
-            eq('4h4k2l', actual)
-          end)
-
-        end)
-
       end)
 
     end)

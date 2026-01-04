@@ -84,21 +84,13 @@ end
 ---@param on CursorPos
 ---@param range Range
 function L.select_linewise(on, range)
-  local begin_idx = {}
-  local end_idx = {}
   local cursor_pos = {}
 
   if on == const.CURSOR_POS.head then
-    begin_idx = range:pos_on_tail()
-    end_idx = range:pos_on_head()
     cursor_pos = range:pos_on_tail()
   elseif on == const.CURSOR_POS.tail then
-    begin_idx = range:pos_on_head()
-    end_idx = range:pos_on_tail()
     cursor_pos = range:pos_on_head()
   else
-    begin_idx = range:pos_on_begin()
-    end_idx = range:pos_on_end()
     cursor_pos = range:pos_on_begin()
   end
 
@@ -112,7 +104,7 @@ function L.select_linewise(on, range)
   local keyseq = ''
     .. L.keyseq_mark_begin_selection
     .. L.keyseq_start_vline_mode
-    .. range:to_key_sequence(begin_idx, end_idx)
+    .. range:key_sequence(on)
     .. L.keyseq_mark_end_selection
   api.nvim_feedkeys(keyseq, 'x', false)
 end
