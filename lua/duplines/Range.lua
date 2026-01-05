@@ -3,7 +3,6 @@
 -- =================================================================================================
 
 ---@alias range_index { from: integer, to: integer }
----@alias index_tuple { integer: integer, integer: integer }
 
 -- This class only accepts and returns (0,0)-Indexed coordinate values (rows and columns).
 ---@class Range
@@ -16,7 +15,6 @@
 ---@field row_count fun(): integer
 ---@field row_index fun(): index_tuple
 ---@field to_next fun(): Range
----@field to_key_sequence fun(self, from: index_tuple, to: index_tuple): string
 ---@field col range_index
 ---@field row range_index
 ---@field inverted boolean
@@ -27,7 +25,6 @@
 -- =================================================================================================
 
 local Range = {}
-local L = {}
 
 
 -- =================================================================================================
@@ -45,34 +42,14 @@ function Range:new (o)
   return o
 end
 
--- / Helper
--- -------------------------------------------------------------------------------------------------
-
-table.unpack = table.unpack or unpack ---@diagnostic disable-line:deprecated
-
----@param from integer
----@param to integer
----@return string
-function L.to_col_keyseq(from, to)
-  local delta = to - from
-
-  if delta == 0 then
-    return ''
-  elseif delta > 0 then
-    return delta .. 'l'
-  else
-    return math.abs(delta) .. 'h'
-  end
-end
-
 -- / Class Method
 -- -------------------------------------------------------------------------------------------------
 
 function Range.from_pos()
-  local row_num_a = vim.fn.getpos('v')[2]
-  local row_num_b = vim.fn.getpos('.')[2]
-  local col_num_a = vim.fn.getpos('v')[3]
-  local col_num_b = vim.fn.getpos('.')[3]
+  local row_num_a = vim.fn.getcharpos('v')[2]
+  local row_num_b = vim.fn.getcharpos('.')[2]
+  local col_num_a = vim.fn.getcharpos('v')[3]
+  local col_num_b = vim.fn.getcharpos('.')[3]
 
   local row_idx_a = row_num_a > 0 and row_num_a - 1 or 0
   local row_idx_b = row_num_b > 0 and row_num_b - 1 or 0
@@ -129,34 +106,6 @@ end
 
 function Range:row_index()
   return { self.row.from, self.row.to }
-end
-
-function Range:to_key_sequence(from, to)
-  local from_row, from_col = table.unpack(from)
-  local to_row, to_col = table.unpack(to)
-
-  -- Single row.
-  if from_row == to_row then
-    return L.to_col_keyseq(from_col, to_col)
-  end
-
-  -- Vertical direction.
-  local row_keyseq = ''
-  local delta = to_row - from_row
-  if delta > 0 then
-    row_keyseq = delta .. 'j'
-  else
-    row_keyseq = math.abs(delta) .. 'k'
-  end
-
-  -- If col can be moved as is to the destination row, the amount of horizontal movement will simply
-  -- be the difference.
-  if to_col >= from_col then
-    return row_keyseq .. L.to_col_keyseq(from_col, to_col)
-  end
-
-  -- Otherwise, the length of the destination row is unknown, so move via the left edge.
-  return L.to_col_keyseq(from_col, 0) .. row_keyseq .. L.to_col_keyseq(0, to_col)
 end
 
 function Range:to_next()

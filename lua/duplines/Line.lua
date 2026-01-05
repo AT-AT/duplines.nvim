@@ -78,24 +78,59 @@ function L.is_v_line_mode()
   return L.get_mode() == 'V'
 end
 
+---@param from index_tuple (0,0)-Indexed.
+---@param to index_tuple (0,0)-Indexed.
+---@return string
+function L.key_sequence(from, to)
+  local from_row, from_col = table.unpack(from)
+  local to_row, to_col = table.unpack(to)
+
+  -- Single row.
+  if from_row == to_row then
+    return L.to_col_keyseq(from_col, to_col)
+  end
+
+  -- Vertical direction.
+  local row_keyseq = ''
+  local delta = to_row - from_row
+  if delta > 0 then
+    row_keyseq = delta .. 'j'
+  else
+    row_keyseq = math.abs(delta) .. 'k'
+  end
+
+  -- If col can be moved as is to the destination row, the amount of horizontal movement will simply
+  -- be the difference.
+  if to_col >= from_col then
+    return row_keyseq .. L.to_col_keyseq(from_col, to_col)
+  end
+
+  -- Otherwise, the length of the destination row is unknown, so move via the left edge.
+  return L.to_col_keyseq(from_col, 0) .. row_keyseq .. L.to_col_keyseq(0, to_col)
+end
+
 -- Emulates actual keystrokes to keep line selection while positioning the cursor.
 -- This could not be achieved by setting the selection mark ("m<", "m>") and then executing the "gv"
 -- command.
 ---@param on CursorPos
 ---@param range Range
 function L.select_linewise(on, range)
-  local begin_idx = {}
-  local end_idx = {}
+  local begin_pos = {}
+  local end_pos = {}
+  local cursor_pos = {}
 
   if on == const.CURSOR_POS.head then
-    begin_idx = range:pos_on_tail()
-    end_idx = range:pos_on_head()
+    begin_pos = range:pos_on_tail()
+    end_pos = range:pos_on_head()
+    cursor_pos = range:pos_on_tail()
   elseif on == const.CURSOR_POS.tail then
-    begin_idx = range:pos_on_head()
-    end_idx = range:pos_on_tail()
+    begin_pos = range:pos_on_head()
+    end_pos = range:pos_on_tail()
+    cursor_pos = range:pos_on_head()
   else
-    begin_idx = range:pos_on_begin()
-    end_idx = range:pos_on_end()
+    begin_pos = range:pos_on_begin()
+    end_pos = range:pos_on_end()
+    cursor_pos = range:pos_on_begin()
   end
 
   if L.is_v_line_mode then
@@ -104,11 +139,12 @@ function L.select_linewise(on, range)
 
   -- Marks "m<" and "m>" are automatically rearranged by Vim so that their coordinates are top to
   -- bottom and left to right.
-  api.nvim_win_set_cursor(0, L.to_cursor_index(begin_idx))
+  api.nvim_win_set_cursor(0, L.to_cursor_index(cursor_pos))
   local keyseq = ''
     .. L.keyseq_mark_begin_selection
     .. L.keyseq_start_vline_mode
-    .. range:to_key_sequence(begin_idx, end_idx)
+    -- .. range:key_sequence(on)
+    .. L.key_sequence(begin_pos, end_pos)
     .. L.keyseq_mark_end_selection
   api.nvim_feedkeys(keyseq, 'x', false)
 end
@@ -132,6 +168,21 @@ function L.set_cursor(on, range)
   end
 
   api.nvim_win_set_cursor(0, L.to_cursor_index(cursor_idx))
+end
+
+---@param from integer
+---@param to integer
+---@return string
+function L.to_col_keyseq(from, to)
+  local delta = to - from
+
+  if delta == 0 then
+    return ''
+  elseif delta > 0 then
+    return delta .. 'l'
+  else
+    return math.abs(delta) .. 'h'
+  end
 end
 
 ---@param index index_tuple (0,0)-Indexed.
