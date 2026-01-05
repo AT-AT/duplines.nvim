@@ -3,7 +3,6 @@
 -- =================================================================================================
 
 ---@alias range_index { from: integer, to: integer }
----@alias index_tuple { integer: integer, integer: integer }
 
 -- This class only accepts and returns (0,0)-Indexed coordinate values (rows and columns).
 ---@class Range
