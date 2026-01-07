@@ -81,16 +81,23 @@ function Helpers.new_child_neovim(path)
   -- / Assertion Helper
   -- -----------------------------------------------------------------------------------------------
 
+  -- NOTE:
+  --  - Even multi-byte characters are processed and considered as bytes, so byte-represented APIs
+  --    can be used.
+
   function child.cursor_pos()
+    -- See comments in this section.
     local pos = child.api.nvim_win_get_cursor(0) -- (1,0)-indexed
 
     return { pos[1] - 1, pos[2] } -- (0,0)-indexed
   end
 
   function child.get_visual_pos()
+    -- See comments in this section.
     local start_pos = child.fn.getpos('v')
     local start_row, start_col = start_pos[2], start_pos[3] - 1
 
+    -- See comments in this section.
     local end_pos = child.api.nvim_win_get_cursor(0)
     local end_row, end_col = end_pos[1], end_pos[2]
 

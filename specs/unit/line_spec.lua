@@ -1251,4 +1251,17 @@ describe('Module.Line', function()
 
   end)
 
+  -- / Multibyte Characters
+  -- -----------------------------------------------------------------------------------------------
+  describe('[multibyte characters]', function()
+
+    it('can be processed in the same way', function()
+      MiniTest.skip(
+        'In the current implementation, all characters including multi-byte characters,'
+        .. ' are processed as Byte representations, so no special tests are provided.'
+      )
+    end)
+
+  end)
+
 end)

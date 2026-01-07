@@ -46,10 +46,13 @@ end
 -- -------------------------------------------------------------------------------------------------
 
 function Range.from_pos()
-  local row_num_a = vim.fn.getcharpos('v')[2]
-  local row_num_b = vim.fn.getcharpos('.')[2]
-  local col_num_a = vim.fn.getcharpos('v')[3]
-  local col_num_b = vim.fn.getcharpos('.')[3]
+  local pos_a = vim.fn.getpos('v')
+  local pos_b = vim.fn.getpos('.')
+
+  local row_num_a = pos_a[2]
+  local row_num_b = pos_b[2]
+  local col_num_a = pos_a[3]
+  local col_num_b = pos_b[3]
 
   local row_idx_a = row_num_a > 0 and row_num_a - 1 or 0
   local row_idx_b = row_num_b > 0 and row_num_b - 1 or 0

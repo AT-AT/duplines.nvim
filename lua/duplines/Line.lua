@@ -78,80 +78,46 @@ function L.is_v_line_mode()
   return L.get_mode() == 'V'
 end
 
----@param from index_tuple (0,0)-Indexed.
----@param to index_tuple (0,0)-Indexed.
----@return string
-function L.key_sequence(from, to)
-  local from_row, from_col = table.unpack(from)
-  local to_row, to_col = table.unpack(to)
-
-  -- Single row.
-  if from_row == to_row then
-    return L.to_col_keyseq(from_col, to_col)
-  end
-
-  -- Vertical direction.
-  local row_keyseq = ''
-  local delta = to_row - from_row
-  if delta > 0 then
-    row_keyseq = delta .. 'j'
-  else
-    row_keyseq = math.abs(delta) .. 'k'
-  end
-
-  -- If col can be moved as is to the destination row, the amount of horizontal movement will simply
-  -- be the difference.
-  if to_col >= from_col then
-    return row_keyseq .. L.to_col_keyseq(from_col, to_col)
-  end
-
-  -- Otherwise, the length of the destination row is unknown, so move via the left edge.
-  return L.to_col_keyseq(from_col, 0) .. row_keyseq .. L.to_col_keyseq(0, to_col)
-end
-
--- Emulates actual keystrokes to keep line selection while positioning the cursor.
--- This could not be achieved by setting the selection mark ("m<", "m>") and then executing the "gv"
--- command.
 ---@param on CursorPos
 ---@param range Range
 function L.select_linewise(on, range)
   local begin_pos = {}
   local end_pos = {}
-  local cursor_pos = {}
 
+  -- To set the cursor while remaining in visual-line mode, the end point of the selection must be
+  -- the same as the final position of the cursor.
   if on == const.CURSOR_POS.head then
     begin_pos = range:pos_on_tail()
     end_pos = range:pos_on_head()
-    cursor_pos = range:pos_on_tail()
   elseif on == const.CURSOR_POS.tail then
     begin_pos = range:pos_on_head()
     end_pos = range:pos_on_tail()
-    cursor_pos = range:pos_on_head()
   else
     begin_pos = range:pos_on_begin()
     end_pos = range:pos_on_end()
-    cursor_pos = range:pos_on_begin()
   end
 
   if L.is_v_line_mode then
-    api.nvim_feedkeys(L.keyseq_esc, 'x', false)
+    L.send_escape()
   end
 
-  -- Marks "m<" and "m>" are automatically rearranged by Vim so that their coordinates are top to
-  -- bottom and left to right.
-  api.nvim_win_set_cursor(0, L.to_cursor_index(cursor_pos))
-  local keyseq = ''
-    .. L.keyseq_mark_begin_selection
-    .. L.keyseq_start_vline_mode
-    -- .. range:key_sequence(on)
-    .. L.key_sequence(begin_pos, end_pos)
-    .. L.keyseq_mark_end_selection
-  api.nvim_feedkeys(keyseq, 'x', false)
+  api.nvim_win_set_cursor(0, L.to_cursor_index(begin_pos))
+  api.nvim_feedkeys(L.keyseq_mark_begin_selection, 'x', false)
+
+  vim.cmd('normal! V')
+
+  api.nvim_win_set_cursor(0, L.to_cursor_index(end_pos))
+  api.nvim_feedkeys(L.keyseq_mark_end_selection, 'x', false)
+end
+
+function L.send_escape()
+  -- vim.cmd('normal! \\<Esc>') and vim.api.nvim_input('<Esc>') had no effect.
+  api.nvim_feedkeys(L.keyseq_esc, 'x', false)
 end
 
 ---@param on CursorPos
 ---@param range Range
-function L.set_cursor(on, range)
+function L.set_cursor_to_final_pos(on, range)
   local cursor_idx = {}
 
   if on == const.CURSOR_POS.head then
@@ -162,27 +128,7 @@ function L.set_cursor(on, range)
     cursor_idx = range:pos_on_end()
   end
 
-  if not L.is_normal_mode() then
-    -- vim.cmd('normal! \\<Esc>') and vim.api.nvim_input('<Esc>') had no effect.
-    api.nvim_feedkeys(L.keyseq_esc, 'x', false)
-  end
-
   api.nvim_win_set_cursor(0, L.to_cursor_index(cursor_idx))
-end
-
----@param from integer
----@param to integer
----@return string
-function L.to_col_keyseq(from, to)
-  local delta = to - from
-
-  if delta == 0 then
-    return ''
-  elseif delta > 0 then
-    return delta .. 'l'
-  else
-    return math.abs(delta) .. 'h'
-  end
 end
 
 ---@param index index_tuple (0,0)-Indexed.
@@ -234,22 +180,27 @@ function Line:duplicate()
     L.select_linewise(params.cursor, target_range)
   else
     -- Create a range for "gv" with the specified cursor placement.
-    -- Note that in "deselect" mode, the selection range with "gv" is not optionally changeable.
+    -- This plugin ALWAYS inserts the duplicated lines immediately after the original lines, so the
+    -- following behavior is natural.
     if not L.is_normal_mode() then
-      -- If the cursor does not move from the source block, moving the "gv" selection range to the
-      -- destination will result in natural behavior.
+      -- When the cursor is placed in the source block, it is probably to express the behavior of
+      -- "copying upwards," so it is natural that the selection range by "gv" is in the destination
+      -- block.
       if on_src then
         L.select_linewise(params.cursor, next_range)
 
-      -- Even if the cursor moves to the destination block, recreate the selection range to match
-      -- the "gv" selection range to the "cursor" option.
+      -- When the cursor is placed in the destination block, it is probably to express the behavior
+      -- of "copying downwards," so it is natural that the selection range by "gv" is in the source
+      -- block.
       else
         L.select_linewise(params.cursor, range)
       end
     end
 
-    L.set_cursor(params.cursor, target_range)
+    L.send_escape()
   end
+
+  L.set_cursor_to_final_pos(params.cursor, target_range)
 end
 
 -- / Instance Method (Parameter Wrapper)
