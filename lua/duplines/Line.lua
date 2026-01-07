@@ -108,8 +108,6 @@ function L.select_linewise(on, range)
 
   api.nvim_win_set_cursor(0, L.to_cursor_index(end_pos))
   api.nvim_feedkeys(L.keyseq_mark_end_selection, 'x', false)
-
-  L.set_cursor_to_final_pos(on, range)
 end
 
 function L.send_escape()
@@ -197,8 +195,9 @@ function Line:duplicate()
     end
 
     L.send_escape()
-    L.set_cursor_to_final_pos(params.cursor, target_range)
   end
+
+  L.set_cursor_to_final_pos(params.cursor, target_range)
 end
 
 -- / Instance Method (Parameter Wrapper)
