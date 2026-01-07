@@ -102,7 +102,7 @@ function L.select_linewise(on, range)
   end
 
   if L.is_v_line_mode then
-    api.nvim_feedkeys(L.keyseq_esc, 'x', false)
+    L.send_escape()
   end
 
   api.nvim_win_set_cursor(0, L.to_cursor_index(begin_pos))
@@ -114,6 +114,11 @@ function L.select_linewise(on, range)
   api.nvim_feedkeys(L.keyseq_mark_end_selection, 'x', false)
 
   api.nvim_win_set_cursor(0, L.to_cursor_index(cursor_pos))
+end
+
+function L.send_escape()
+  -- vim.cmd('normal! \\<Esc>') and vim.api.nvim_input('<Esc>') had no effect.
+  api.nvim_feedkeys(L.keyseq_esc, 'x', false)
 end
 
 ---@param on CursorPos
@@ -130,8 +135,7 @@ function L.set_cursor(on, range)
   end
 
   if not L.is_normal_mode() then
-    -- vim.cmd('normal! \\<Esc>') and vim.api.nvim_input('<Esc>') had no effect.
-    api.nvim_feedkeys(L.keyseq_esc, 'x', false)
+    L.send_escape()
   end
 
   api.nvim_win_set_cursor(0, L.to_cursor_index(cursor_idx))
