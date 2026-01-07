@@ -83,22 +83,18 @@ end
 function L.select_linewise(on, range)
   local begin_pos = {}
   local end_pos = {}
-  local cursor_pos = {}
 
   -- To set the cursor while remaining in visual-line mode, the end point of the selection must be
   -- the same as the final position of the cursor.
   if on == const.CURSOR_POS.head then
     begin_pos = range:pos_on_tail()
     end_pos = range:pos_on_head()
-    cursor_pos = range:pos_on_head()
   elseif on == const.CURSOR_POS.tail then
     begin_pos = range:pos_on_head()
     end_pos = range:pos_on_tail()
-    cursor_pos = range:pos_on_tail()
   else
     begin_pos = range:pos_on_begin()
     end_pos = range:pos_on_end()
-    cursor_pos = range:pos_on_end()
   end
 
   if L.is_v_line_mode then
@@ -113,7 +109,7 @@ function L.select_linewise(on, range)
   api.nvim_win_set_cursor(0, L.to_cursor_index(end_pos))
   api.nvim_feedkeys(L.keyseq_mark_end_selection, 'x', false)
 
-  api.nvim_win_set_cursor(0, L.to_cursor_index(cursor_pos))
+  L.set_cursor_to_final_pos(on, range)
 end
 
 function L.send_escape()
@@ -123,7 +119,7 @@ end
 
 ---@param on CursorPos
 ---@param range Range
-function L.set_cursor(on, range)
+function L.set_cursor_to_final_pos(on, range)
   local cursor_idx = {}
 
   if on == const.CURSOR_POS.head then
@@ -132,10 +128,6 @@ function L.set_cursor(on, range)
     cursor_idx = range:pos_on_tail()
   else
     cursor_idx = range:pos_on_end()
-  end
-
-  if not L.is_normal_mode() then
-    L.send_escape()
   end
 
   api.nvim_win_set_cursor(0, L.to_cursor_index(cursor_idx))
@@ -204,7 +196,8 @@ function Line:duplicate()
       end
     end
 
-    L.set_cursor(params.cursor, target_range)
+    L.send_escape()
+    L.set_cursor_to_final_pos(params.cursor, target_range)
   end
 end
 
