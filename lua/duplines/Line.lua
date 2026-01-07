@@ -180,15 +180,18 @@ function Line:duplicate()
     L.select_linewise(params.cursor, target_range)
   else
     -- Create a range for "gv" with the specified cursor placement.
-    -- Note that in "deselect" mode, the selection range with "gv" is not optionally changeable.
+    -- This plugin ALWAYS inserts the duplicated lines immediately after the original lines, so the
+    -- following behavior is natural.
     if not L.is_normal_mode() then
-      -- If the cursor does not move from the source block, moving the "gv" selection range to the
-      -- destination will result in natural behavior.
+      -- When the cursor is placed in the source block, it is probably to express the behavior of
+      -- "copying upwards," so it is natural that the selection range by "gv" is in the destination
+      -- block.
       if on_src then
         L.select_linewise(params.cursor, next_range)
 
-      -- Even if the cursor moves to the destination block, recreate the selection range to match
-      -- the "gv" selection range to the "cursor" option.
+      -- When the cursor is placed in the destination block, it is probably to express the behavior
+      -- of "copying downwards," so it is natural that the selection range by "gv" is in the source
+      -- block.
       else
         L.select_linewise(params.cursor, range)
       end
