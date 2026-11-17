@@ -21,12 +21,15 @@
 -- =================================================================================================
 
 ---@see vim.api
+---
 local api = vim.api
 
 ---@module 'duplines.enum'
+---
 local const = require('duplines.enum')
 
 ---@module 'duplines.config'
+---
 local config = require('duplines.config')
 
 
@@ -39,22 +42,8 @@ local L = {}
 
 
 -- =================================================================================================
---  Function
+--  Definition
 -- =================================================================================================
-
--- / Constructor
--- -------------------------------------------------------------------------------------------------
-
----@private
-function Line:new (o)
-  o = o or {}
-  setmetatable(o, self)
-  self.__index = self
-  return o
-end
-
--- / Helper
--- -------------------------------------------------------------------------------------------------
 
 table.unpack = table.unpack or unpack ---@diagnostic disable-line:deprecated
 
@@ -63,78 +52,21 @@ L.keyseq_mark_begin_selection = api.nvim_replace_termcodes('m<', true, false, tr
 L.keyseq_mark_end_selection = api.nvim_replace_termcodes('m>', true, false, true)
 L.keyseq_esc = api.nvim_replace_termcodes('<Esc>', true, false, true)
 
----@return string
-function L.get_mode()
-  return api.nvim_get_mode().mode
-end
 
----@return boolean
-function L.is_normal_mode()
-  return L.get_mode() == 'n'
-end
+-- =================================================================================================
+--  Method
+-- =================================================================================================
 
----@return boolean
-function L.is_v_line_mode()
-  return L.get_mode() == 'V'
-end
+-- / Constructor
+-- -------------------------------------------------------------------------------------------------
 
----@param on CursorPos
----@param range Range
-function L.select_linewise(on, range)
-  local begin_pos = {}
-  local end_pos = {}
-
-  -- To set the cursor while remaining in visual-line mode, the end point of the selection must be
-  -- the same as the final position of the cursor.
-  if on == const.CURSOR_POS.head then
-    begin_pos = range:pos_on_tail()
-    end_pos = range:pos_on_head()
-  elseif on == const.CURSOR_POS.tail then
-    begin_pos = range:pos_on_head()
-    end_pos = range:pos_on_tail()
-  else
-    begin_pos = range:pos_on_begin()
-    end_pos = range:pos_on_end()
-  end
-
-  if L.is_v_line_mode then
-    L.send_escape()
-  end
-
-  api.nvim_win_set_cursor(0, L.to_cursor_index(begin_pos))
-  api.nvim_feedkeys(L.keyseq_mark_begin_selection, 'x', false)
-
-  vim.cmd('normal! V')
-
-  api.nvim_win_set_cursor(0, L.to_cursor_index(end_pos))
-  api.nvim_feedkeys(L.keyseq_mark_end_selection, 'x', false)
-end
-
-function L.send_escape()
-  -- vim.cmd('normal! \\<Esc>') and vim.api.nvim_input('<Esc>') had no effect.
-  api.nvim_feedkeys(L.keyseq_esc, 'x', false)
-end
-
----@param on CursorPos
----@param range Range
-function L.set_cursor_to_final_pos(on, range)
-  local cursor_idx = {}
-
-  if on == const.CURSOR_POS.head then
-    cursor_idx = range:pos_on_head()
-  elseif on == const.CURSOR_POS.tail then
-    cursor_idx = range:pos_on_tail()
-  else
-    cursor_idx = range:pos_on_end()
-  end
-
-  api.nvim_win_set_cursor(0, L.to_cursor_index(cursor_idx))
-end
-
----@param index index_tuple (0,0)-Indexed.
----@return integer[] (1,0)-Indexed.
-function L.to_cursor_index(index)
-  return { index[1] + 1, index[2] }
+---@private
+---
+function Line:new (o)
+  o = o or {}
+  setmetatable(o, self)
+  self.__index = self
+  return o
 end
 
 -- / Class Method
@@ -246,6 +178,99 @@ function Line:tail()
   self.params.cursor = const.CURSOR_POS.tail
 
   return self
+end
+
+
+-- =================================================================================================
+--  Function (Helper)
+-- =================================================================================================
+
+---@private
+---@return string
+---
+function L.get_mode()
+  return api.nvim_get_mode().mode
+end
+
+---@private
+---@return boolean
+---
+function L.is_normal_mode()
+  return L.get_mode() == 'n'
+end
+
+---@private
+---@return boolean
+---
+function L.is_v_line_mode()
+  return L.get_mode() == 'V'
+end
+
+---@private
+---@param on CursorPos
+---@param range Range
+---
+function L.select_linewise(on, range)
+  local begin_pos = {}
+  local end_pos = {}
+
+  -- To set the cursor while remaining in visual-line mode, the end point of the selection must be
+  -- the same as the final position of the cursor.
+  if on == const.CURSOR_POS.head then
+    begin_pos = range:pos_on_tail()
+    end_pos = range:pos_on_head()
+  elseif on == const.CURSOR_POS.tail then
+    begin_pos = range:pos_on_head()
+    end_pos = range:pos_on_tail()
+  else
+    begin_pos = range:pos_on_begin()
+    end_pos = range:pos_on_end()
+  end
+
+  if L.is_v_line_mode then
+    L.send_escape()
+  end
+
+  api.nvim_win_set_cursor(0, L.to_cursor_index(begin_pos))
+  api.nvim_feedkeys(L.keyseq_mark_begin_selection, 'x', false)
+
+  vim.cmd('normal! V')
+
+  api.nvim_win_set_cursor(0, L.to_cursor_index(end_pos))
+  api.nvim_feedkeys(L.keyseq_mark_end_selection, 'x', false)
+end
+
+---@private
+---
+function L.send_escape()
+  -- vim.cmd('normal! \\<Esc>') and vim.api.nvim_input('<Esc>') had no effect.
+  api.nvim_feedkeys(L.keyseq_esc, 'x', false)
+end
+
+---@private
+---@param on CursorPos
+---@param range Range
+---
+function L.set_cursor_to_final_pos(on, range)
+  local cursor_idx = {}
+
+  if on == const.CURSOR_POS.head then
+    cursor_idx = range:pos_on_head()
+  elseif on == const.CURSOR_POS.tail then
+    cursor_idx = range:pos_on_tail()
+  else
+    cursor_idx = range:pos_on_end()
+  end
+
+  api.nvim_win_set_cursor(0, L.to_cursor_index(cursor_idx))
+end
+
+---@private
+---@param index index_tuple (0,0)-Indexed.
+---@return integer[] (1,0)-Indexed.
+---
+function L.to_cursor_index(index)
+  return { index[1] + 1, index[2] }
 end
 
 

@@ -81,7 +81,7 @@ function Helpers.new_child_neovim(path)
   -- / Assertion Helper
   -- -----------------------------------------------------------------------------------------------
 
-  -- NOTE:
+  -- Note:
   --  - Even multi-byte characters are processed and considered as bytes, so byte-represented APIs
   --    can be used.
 

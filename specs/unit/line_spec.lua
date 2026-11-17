@@ -74,7 +74,7 @@ describe('Module.Line', function()
   -- -----------------------------------------------------------------------------------------------
   describe('[duplication]', function()
 
-    -- NOTE:
+    -- Note:
     --  - Mocking dependent class "Range" is quite difficult, so we use the actual module.
     --  - Since there are many patterns and it is difficult to cover them all, use reasonable cases.
     local function prepare_line_instance_on_single_line_with_no_selection()
@@ -1087,7 +1087,7 @@ describe('Module.Line', function()
   -- -----------------------------------------------------------------------------------------------
   describe('[dynamic configuration]', function()
 
-    -- NOTE:
+    -- Note:
     --  - It is bad practice to make "params" public when they should be private, and then reference
     --    them for testing. However, we will allow it for the following reasons:
     --      - Implementing private, which is not in the language specification, would complicate the
