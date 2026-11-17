@@ -160,34 +160,36 @@ Helpers.expect.has_range = MiniTest.new_expectation(
   end
 )
 
+Helpers.expect.is_null = MiniTest.new_expectation(
+  'null like value determination',
+  function(value)
+    return value == nil or value == vim.NIL
+  end,
+  function()
+    return 'Value is neither nil nor vim.NIL.'
+  end
+)
+
+Helpers.expect.is_not_null = MiniTest.new_expectation(
+  'non-null like value determination',
+  function(value)
+    return value ~= nil and value ~= vim.NIL
+  end,
+  function()
+    return 'Value is nil or vim.NIL.'
+  end
+)
+
 -- / Inspection
 -- -------------------------------------------------------------------------------------------------
 
-function Helpers.dump(thing)
-  Helpers.print('----------')
-  Helpers.print(Helpers.to_string(thing))
-  Helpers.print('----------')
+function Helpers.p(thing)
+  vim.print('--------------------------------------------------')
+  vim.print(thing)
 end
 
-function Helpers.print(thing)
-  vim.notify(Helpers.to_string(thing))
-end
-
-function Helpers.to_string(thing)
-  if type(thing) == 'table' then
-    local joined = '{ '
-
-    for k, v in pairs(thing) do
-      if type(k) ~= 'number' then k = '"' .. k .. '"' end
-      joined = joined .. '['.. k ..'] = ' .. Helpers.to_string(v) .. ','
-    end
-
-    return joined .. ' }'
-  elseif thing == nil then
-    return 'nil'
-  else
-    return tostring(thing)
-  end
+function Helpers.mc()
+  vim.cmd('messages clear')
 end
 
 return Helpers
