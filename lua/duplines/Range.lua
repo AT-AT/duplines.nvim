@@ -1,23 +1,10 @@
 -- =================================================================================================
---  Types
+--  Loaded Module
 -- =================================================================================================
 
----@alias range_index { from: integer, to: integer }
-
--- This class only accepts and returns (0,0)-Indexed coordinate values (rows and columns).
----@class Range
----@field from_pos fun(): Range Factory (class method)
----@field col_index fun(): index_tuple
----@field pos_on_begin fun(): index_tuple
----@field pos_on_end fun(): index_tuple
----@field pos_on_head fun(): index_tuple
----@field pos_on_tail fun(): index_tuple
----@field row_count fun(): integer
----@field row_index fun(): index_tuple
----@field to_next fun(): Range
----@field col range_index
----@field row range_index
----@field inverted boolean
+---@see vim.fn
+---
+local fn = vim.fn
 
 
 -- =================================================================================================
@@ -47,8 +34,8 @@ end
 -- -------------------------------------------------------------------------------------------------
 
 function Range.from_pos()
-  local pos_a = vim.fn.getpos('v')
-  local pos_b = vim.fn.getpos('.')
+  local pos_a = fn.getpos('v')
+  local pos_b = fn.getpos('.')
 
   local row_num_a = pos_a[2]
   local row_num_b = pos_b[2]

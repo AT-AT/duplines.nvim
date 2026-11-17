@@ -19,7 +19,7 @@ local Range = require('duplines.Range')
 --  Namespace
 -- =================================================================================================
 
-local API = {}
+local M = {}
 
 
 -- =================================================================================================
@@ -29,13 +29,13 @@ local API = {}
 ---@param params PluginOptions?
 ---@return Line
 ---
-function API.line(params)
+function M.line(params)
   return Line.on_range(Range.from_pos(), params or {})
 end
 
 ---@param local_options PluginOptions?
 ---
-function API.setup(local_options)
+function M.setup(local_options)
   config.merge_options(local_options or {})
 end
 
@@ -45,6 +45,6 @@ end
 -- =================================================================================================
 
 return {
-  line = API.line,
-  setup = API.setup,
+  line = M.line,
+  setup = M.setup,
 }

@@ -4,7 +4,7 @@ local H = require('specs/helpers')
 local eq, no_error = MiniTest.expect.equality, MiniTest.expect.no_error
 local has_no_selection = H.expect.has_no_selection
 local child = H.new_child_neovim('duplines.Line')
-local const = require('duplines.enum')
+local const = require('duplines.const')
 
 -- / Module
 -- -------------------------------------------------------------------------------------------------

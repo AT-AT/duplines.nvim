@@ -1,22 +1,4 @@
 -- =================================================================================================
---  Types
--- =================================================================================================
-
----@class Line
----@field on_range fun(range: Range, params: PluginOptions?): Line Factory (class method)
----@field dest fun(): self
----@field deselect fun(): self
----@field duplicate fun()
----@field head fun(): self
----@field keep fun(): self
----@field select fun(): self
----@field src fun(): self
----@field tail fun(): self
----@field range Range
----@field params PluginOptions
-
-
--- =================================================================================================
 --  Loaded Module
 -- =================================================================================================
 
@@ -24,13 +6,13 @@
 ---
 local api = vim.api
 
----@module 'duplines.enum'
----
-local const = require('duplines.enum')
-
 ---@module 'duplines.config'
 ---
 local config = require('duplines.config')
+
+---@module 'duplines.const'
+---
+local const = require('duplines.const')
 
 
 -- =================================================================================================
