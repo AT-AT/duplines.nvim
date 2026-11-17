@@ -2,7 +2,7 @@
 
 Duplicate one or more lines. That's all.
 
-![Sample](sample.png)
+![Duplicate Line Sample](sample.png)
 
 ## Acknowledgements
 
@@ -28,12 +28,9 @@ Install the plugin with your preferred package manager. Here is an example in [l
 ```lua
 {
   'AT-AT/duplines.nvim',
-  config = function()
-    -- No need to execute unless you want to change the default option values.
-    require('duplines').setup({
-      -- options...
-    })
-  end,
+  opts = {
+    -- options...
+  },
 }
 ```
 
@@ -46,13 +43,16 @@ Below are the configurable options and their default values.
 
   -- The range to place the cursor on or select after duplication.
   -- See documentation for available values and details.
+  ---@type string
   target = 'dest',
 
   -- The position within the range to place the cursor after duplication.
   -- See documentation for available values and details.
+  ---@type string
   cursor = 'head',
 
   -- Whether the range should be selected or not after duplication.
+  ---@type boolean
   select = false,
 }
 ```
@@ -81,7 +81,7 @@ vim.keymap.set({ 'n', 'x' }, '<M-DOWN>', function()
 end)
 ```
 
-If you are using Lazy.nvim, you can perform lazy loading at the same time by registering with the "keys" option.
+If you are using Lazy.nvim, you can perform lazy loading at the same time by registering with the `keys` option.
 ```lua
 {
   keys = {
@@ -110,4 +110,3 @@ If you are using Lazy.nvim, you can perform lazy loading at the same time by reg
 ## License
 
 [MIT](LICENSE)
-
