@@ -1,23 +1,10 @@
 -- =================================================================================================
---  Types
+--  Loaded Module
 -- =================================================================================================
 
----@alias range_index { from: integer, to: integer }
-
--- This class only accepts and returns (0,0)-Indexed coordinate values (rows and columns).
----@class Range
----@field from_pos fun(): Range Factory (class method)
----@field col_index fun(): index_tuple
----@field pos_on_begin fun(): index_tuple
----@field pos_on_end fun(): index_tuple
----@field pos_on_head fun(): index_tuple
----@field pos_on_tail fun(): index_tuple
----@field row_count fun(): integer
----@field row_index fun(): index_tuple
----@field to_next fun(): Range
----@field col range_index
----@field row range_index
----@field inverted boolean
+---@see vim.fn
+---
+local fn = vim.fn
 
 
 -- =================================================================================================
@@ -28,13 +15,17 @@ local Range = {}
 
 
 -- =================================================================================================
---  Function
+--  Method
 -- =================================================================================================
 
 -- / Constructor
 -- -------------------------------------------------------------------------------------------------
 
+--- Constructor.
+---
 ---@private
+---@return Range
+---
 function Range:new (o)
   o = o or {}
   setmetatable(o, self)
@@ -45,9 +36,11 @@ end
 -- / Class Method
 -- -------------------------------------------------------------------------------------------------
 
+--- Create a Range object from the current target row or the selected range.
+---
 function Range.from_pos()
-  local pos_a = vim.fn.getpos('v')
-  local pos_b = vim.fn.getpos('.')
+  local pos_a = fn.getpos('v')
+  local pos_b = fn.getpos('.')
 
   local row_num_a = pos_a[2]
   local row_num_b = pos_b[2]
@@ -77,40 +70,58 @@ end
 -- / Instance Method
 -- -------------------------------------------------------------------------------------------------
 
+--- Get the indices for the start and end columns.
+---
 function Range:col_index()
   return { self.col.from, self.col.to }
 end
 
+--- Determine whether the selection direction is inverted.
+---
 function Range:is_inverted()
   return self.inverted
 end
 
-function Range:pos_on_head()
-  return { self.row.from, 0 }
-end
-
-function Range:pos_on_tail()
-  return { self.row.to, 0 }
-end
-
+--- Get the index of the starting row of the selection.
+---
 function Range:pos_on_begin()
   local pos = self:is_inverted() and 'to' or 'from'
   return { self.row[pos], self.col[pos] }
 end
 
+--- Get the index of the end row of the selection.
+---
 function Range:pos_on_end()
   local pos = self:is_inverted() and 'from' or 'to'
   return { self.row[pos], self.col[pos] }
 end
 
+--- Get the index of the start row.
+---
+function Range:pos_on_head()
+  return { self.row.from, 0 }
+end
+
+--- Get the index of the end row.
+---
+function Range:pos_on_tail()
+  return { self.row.to, 0 }
+end
+
+--- Get the number of rows.
+---
 function Range:row_count()
   return self.row.to - self.row.from + 1
 end
 
+--- Get the indices for the start and end rows.
+---
 function Range:row_index()
   return { self.row.from, self.row.to }
 end
 
+--- Create a Range object for the destination.
+---
 function Range:to_next()
   local row_count = self:row_count()
 

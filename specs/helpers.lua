@@ -19,6 +19,9 @@ local Helpers = {}
 ---@field change_config function
 ---@field config_of function
 ---@field prepare_rows function
+---@field create_event_watcher function
+---@field grub_event_result function
+---@field grub_marks function
 ---@field lines_on function
 ---@field cursor_pos function
 ---@field get_visual_pos function
@@ -81,7 +84,55 @@ function Helpers.new_child_neovim(path)
   -- / Assertion Helper
   -- -----------------------------------------------------------------------------------------------
 
-  -- NOTE:
+  function child.create_event_watcher(event_name)
+    local event_watcher_definition = [[
+      _G.test_helpers = {}
+      _G.test_helpers.watch_user_event = function(event_name)
+        local result = {
+          count = 0,
+          data = {},
+        }
+
+        local id = vim.api.nvim_create_autocmd('User', {
+          pattern = event_name,
+          callback = function(ev)
+            result.count = result.count + 1
+            table.insert(result.data, ev.data)
+          end,
+        })
+
+        return {
+          id = id,
+          result = result,
+        }
+      end
+    ]]
+
+    child.lua(event_watcher_definition)
+    child.api.nvim_exec_lua([[
+      _G.event_watcher = _G.test_helpers.watch_user_event(...)
+    ]], { event_name })
+  end
+
+  function child.grub_event_result()
+    return {
+      count = child.lua_get('_G.event_watcher.result.count'),
+      data = child.lua_get('_G.event_watcher.result.data'),
+    }
+  end
+
+  function child.grub_marks()
+    local marks = child.fn.getmarklist('%')
+    local globals = child.fn.getmarklist()
+
+    for _, v in ipairs(globals) do
+      table.insert(marks, v)
+    end
+
+    return marks
+  end
+
+  -- Note:
   --  - Even multi-byte characters are processed and considered as bytes, so byte-represented APIs
   --    can be used.
 
@@ -160,34 +211,54 @@ Helpers.expect.has_range = MiniTest.new_expectation(
   end
 )
 
+Helpers.expect.has_mark = MiniTest.new_expectation(
+  'mark existence determination',
+  function(expected, actual)
+    local mark, row = expected[1], expected[2]
+    local matched = vim.tbl_filter(function (value)
+      return value.mark == "'" .. mark and value.pos[2] == row
+    end, actual)
+
+    return vim.tbl_count(matched) == 1
+  end,
+  function(expected, actual)
+    return string.format(
+      'Expected mark (%s, row: %d) does not exist in %s.',
+      expected[1], expected[2], vim.inspect(actual)
+    )
+  end
+)
+
+Helpers.expect.is_null = MiniTest.new_expectation(
+  'null like value determination',
+  function(value)
+    return value == nil or value == vim.NIL
+  end,
+  function()
+    return 'Value is neither nil nor vim.NIL.'
+  end
+)
+
+Helpers.expect.is_not_null = MiniTest.new_expectation(
+  'non-null like value determination',
+  function(value)
+    return value ~= nil and value ~= vim.NIL
+  end,
+  function()
+    return 'Value is nil or vim.NIL.'
+  end
+)
+
 -- / Inspection
 -- -------------------------------------------------------------------------------------------------
 
-function Helpers.dump(thing)
-  Helpers.print('----------')
-  Helpers.print(Helpers.to_string(thing))
-  Helpers.print('----------')
+function Helpers.p(thing)
+  vim.print('--------------------------------------------------')
+  vim.print(thing)
 end
 
-function Helpers.print(thing)
-  vim.notify(Helpers.to_string(thing))
-end
-
-function Helpers.to_string(thing)
-  if type(thing) == 'table' then
-    local joined = '{ '
-
-    for k, v in pairs(thing) do
-      if type(k) ~= 'number' then k = '"' .. k .. '"' end
-      joined = joined .. '['.. k ..'] = ' .. Helpers.to_string(v) .. ','
-    end
-
-    return joined .. ' }'
-  elseif thing == nil then
-    return 'nil'
-  else
-    return tostring(thing)
-  end
+function Helpers.mc()
+  vim.cmd('messages clear')
 end
 
 return Helpers

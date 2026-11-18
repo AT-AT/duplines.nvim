@@ -3,12 +3,15 @@
 -- =================================================================================================
 
 ---@module 'duplines.config'
+---
 local config = require('duplines.config')
 
 ---@module 'duplines.Line'
+---
 local Line = require('duplines.Line')
 
 ---@module 'duplines.Range'
+---
 local Range = require('duplines.Range')
 
 
@@ -16,22 +19,30 @@ local Range = require('duplines.Range')
 --  Namespace
 -- =================================================================================================
 
-local API = {}
+local M = {}
 
 
 -- =================================================================================================
 --  Function (API)
 -- =================================================================================================
 
----@param params PluginOptions?
----@return Line
-function API.line(params)
-  return Line.on_range(Range.from_pos(), params or {})
+--- Setup.
+---
+---@param local_options PluginOptions?
+---
+function M.setup(local_options)
+  config.merge_options(local_options or {})
 end
 
----@param local_options PluginOptions?
-function API.setup(local_options)
-  config.merge_options(local_options or {})
+-- -------------------------------------------------------------------------------------------------
+
+--- Generate a Line class object that performs the duplication process.
+---
+---@param params PluginOptions?
+---@return Line
+---
+function M.line(params)
+  return Line.on_range(Range.from_pos(), params or {})
 end
 
 
@@ -40,6 +51,6 @@ end
 -- =================================================================================================
 
 return {
-  line = API.line,
-  setup = API.setup,
+  line = M.line,
+  setup = M.setup,
 }

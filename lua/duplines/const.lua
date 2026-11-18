@@ -3,12 +3,14 @@
 -- =================================================================================================
 
 ---@enum (key) Target
+---
 local TARGET = {
   src = 'src',
   dest = 'dest',
 }
 
 ---@enum (key) CursorPos
+---
 local CURSOR_POS = {
   keep = 'keep',
   head = 'head',

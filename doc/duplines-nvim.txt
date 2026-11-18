@@ -79,6 +79,19 @@ Options ~
     Default: `false` ~
 
 
+                                                     *duplines-opt-event_name*
+  event_name ~
+
+    The user event name issued after the duplication is complete.
+    The buffer number for which the duplication occurred is passed as event
+    data.
+      e.g., ev.data => { buf_id = 2 }
+
+    Type: `string` ~
+
+    Default: 'DuplinesLineDuplicated' ~
+
+
 ==============================================================================
 2. Key Mappings                                        *duplines-key-mappings*
 

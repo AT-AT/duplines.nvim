@@ -4,7 +4,7 @@ local H = require('specs/helpers')
 local eq = MiniTest.expect.equality
 local has_no_selection = H.expect.has_no_selection
 local child = H.new_child_neovim('duplines')
-local const = require('duplines.enum')
+local const = require('duplines.const')
 
 -- / API
 -- -------------------------------------------------------------------------------------------------
@@ -53,6 +53,22 @@ describe('API', function()
             eq(child.lines_on(0, 2), child.lines_on(3, 5))
             has_no_selection(child)
             eq({ 2, 4 }, child.cursor_pos())
+          end)
+
+          it('with event emission', function()
+            -- Arrange
+            local buf_id = child.api.nvim_get_current_buf()
+            local event_name = child.config_of('event_name')
+            child.create_event_watcher(event_name)
+
+            -- Act
+            child.lua([[SUT.line():duplicate()]])
+            local actual = child.grub_event_result()
+
+            -- Assert
+            eq(1, actual.count)
+            eq(1, vim.tbl_count(actual.data))
+            eq(buf_id, actual.data[1].buf_id)
           end)
 
           it('with passed options', function()
