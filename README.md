@@ -54,6 +54,12 @@ Below are the configurable options and their default values.
   -- Whether the range should be selected or not after duplication.
   ---@type boolean
   select = false,
+
+  -- The user event name emitted after the duplication is complete.
+  -- The buffer number for which the duplication occurred is passed as event data.
+  --   e.g., ev.data => { buf_id = 2 }
+  ---@type string
+  event_name = 'DuplinesLineDuplicated',
 }
 ```
 

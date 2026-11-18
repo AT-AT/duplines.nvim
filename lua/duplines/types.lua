@@ -7,6 +7,7 @@
 ---@field cursor CursorPos
 ---@field select boolean
 ---@field target Target
+---@field event_name string
 
 ---@alias index_tuple { integer: integer, integer: integer }
 

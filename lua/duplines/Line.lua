@@ -135,6 +135,7 @@ function Line:duplicate()
   end
 
   L.set_cursor_to_final_pos(params.cursor, target_range)
+  L.emit_event()
 end
 
 -- / Instance Method (Parameter Wrapper)
@@ -186,6 +187,19 @@ end
 -- =================================================================================================
 --  Function (Helper)
 -- =================================================================================================
+
+--- Trigger an event when the row shift is complete.
+---
+---@private
+---
+function L.emit_event()
+  api.nvim_exec_autocmds('User', {
+    pattern = config.options.event_name,
+    data = {
+      buf_id = api.nvim_get_current_buf(),
+    },
+  })
+end
 
 --- Get the current mode.
 ---

@@ -18,12 +18,17 @@ local M = {}
 --  Definition
 -- =================================================================================================
 
+---@type string
+---
+M.plugin_name = 'Duplines'
+
 ---@type PluginOptions
 ---
 M.default_options = {
   target = const.TARGET.dest,
   cursor = const.CURSOR_POS.head,
   select = false,
+  event_name = M.plugin_name .. 'LineDuplicated',
 }
 
 ---@type PluginOptions

@@ -19,9 +19,11 @@ local Helpers = {}
 ---@field change_config function
 ---@field config_of function
 ---@field prepare_rows function
+---@field create_event_watcher function
+---@field grub_event_result function
+---@field grub_marks function
 ---@field lines_on function
 ---@field cursor_pos function
----@field grub_marks function
 ---@field get_visual_pos function
 
 function Helpers.new_child_neovim(path)
@@ -82,6 +84,54 @@ function Helpers.new_child_neovim(path)
   -- / Assertion Helper
   -- -----------------------------------------------------------------------------------------------
 
+  function child.create_event_watcher(event_name)
+    local event_watcher_definition = [[
+      _G.test_helpers = {}
+      _G.test_helpers.watch_user_event = function(event_name)
+        local result = {
+          count = 0,
+          data = {},
+        }
+
+        local id = vim.api.nvim_create_autocmd('User', {
+          pattern = event_name,
+          callback = function(ev)
+            result.count = result.count + 1
+            table.insert(result.data, ev.data)
+          end,
+        })
+
+        return {
+          id = id,
+          result = result,
+        }
+      end
+    ]]
+
+    child.lua(event_watcher_definition)
+    child.api.nvim_exec_lua([[
+      _G.event_watcher = _G.test_helpers.watch_user_event(...)
+    ]], { event_name })
+  end
+
+  function child.grub_event_result()
+    return {
+      count = child.lua_get('_G.event_watcher.result.count'),
+      data = child.lua_get('_G.event_watcher.result.data'),
+    }
+  end
+
+  function child.grub_marks()
+    local marks = child.fn.getmarklist('%')
+    local globals = child.fn.getmarklist()
+
+    for _, v in ipairs(globals) do
+      table.insert(marks, v)
+    end
+
+    return marks
+  end
+
   -- Note:
   --  - Even multi-byte characters are processed and considered as bytes, so byte-represented APIs
   --    can be used.
@@ -112,17 +162,6 @@ function Helpers.new_child_neovim(path)
 
   function child.lines_on(from, to)
     return child.api.nvim_buf_get_lines(0, from, to + 1, true) -- 0-based, end-exclusive
-  end
-
-  function child.grub_marks()
-    local marks = child.fn.getmarklist('%')
-    local globals = child.fn.getmarklist()
-
-    for _, v in ipairs(globals) do
-      table.insert(marks, v)
-    end
-
-    return marks
   end
 
   return child
