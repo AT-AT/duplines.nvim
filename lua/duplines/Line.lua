@@ -83,12 +83,14 @@ end
 -- / Instance Method
 -- -------------------------------------------------------------------------------------------------
 
+--- Duplicate the rows in the target range.
+---
 function Line:duplicate()
   local params = self.params
   local range = self.range
-  local row_idx_from, _ = table.unpack(range:row_index())
+  local row_idx_from, row_idx_to = table.unpack(range:row_index())
   local next_range = range:to_next()
-  local next_range_row_idx_from, _ = table.unpack(next_range:row_index())
+  local next_range_row_idx_from, next_range_row_idx_to = table.unpack(next_range:row_index())
   local sources = api.nvim_buf_get_lines(0, row_idx_from, next_range_row_idx_from, true)
 
   -- Always duplicate after selection.
@@ -96,6 +98,17 @@ function Line:duplicate()
 
   local on_src = params.target == const.TARGET.src
   local target_range = on_src and range or next_range
+
+  -- When the cursor is positioned on the source side (such as when performing a pseudo-upward
+  -- duplication), the mark should be placed on the destination side. Therefore, the source—which
+  -- currently holds the mark—and the destination should be swapped.
+  if on_src then
+    vim.cmd({
+      cmd = 'move',
+      range = { row_idx_from + 1, row_idx_to + 1 },
+      args = { next_range_row_idx_to + 1 },
+    })
+  end
 
   if params.select then
     L.select_linewise(params.cursor, target_range)

@@ -3,6 +3,7 @@ package.loaded['specs/helpers'] = nil
 local H = require('specs/helpers')
 local eq, no_error = MiniTest.expect.equality, MiniTest.expect.no_error
 local has_no_selection = H.expect.has_no_selection
+local has_mark = H.expect.has_mark
 local child = H.new_child_neovim('duplines.Line')
 local const = require('duplines.const')
 
@@ -52,11 +53,13 @@ describe('Module.Line', function()
           target = const.TARGET.src,
           cursor = const.CURSOR_POS.keep,
           select = true,
+          event_name = 'foo',
         }
         local option_str = '{'
           .. 'target = "' .. const.TARGET.src .. '",'
           .. 'cursor = "' .. const.CURSOR_POS.keep .. '",'
-          .. 'select = ' .. 'true'
+          .. 'select = ' .. 'true' .. ','
+          .. 'event_name = "foo"'
           .. '}'
 
         -- Act
@@ -175,6 +178,158 @@ describe('Module.Line', function()
 
           -- Assert
           eq(child.lines_on(0, 2), child.lines_on(3, 5))
+        end)
+
+        -- / Mark Handling
+        -- -----------------------------------------------------------------------------------------
+        describe('with mark', function()
+
+          describe('to downward, keep original position', function()
+
+            before_each(function()
+              child.change_config('target = "' .. const.TARGET.dest .. '"')
+            end)
+
+            it('single line with no selection', function()
+              -- Arrange
+              prepare_line_instance_on_single_line_with_no_selection()
+              child.type_keys('ma')
+
+              -- Act
+              child.lua([[L:duplicate()]])
+              local actual = child.grub_marks()
+
+              -- Assert
+              has_mark({'a', 1}, actual)
+            end)
+
+            it('single line with selection', function()
+              -- Arrange
+              prepare_line_instance_on_single_line_with_selection()
+              child.type_keys('ma')
+
+              -- Act
+              child.lua([[L:duplicate()]])
+              local actual = child.grub_marks()
+
+              -- Assert
+              has_mark({'a', 1}, actual)
+            end)
+
+            it('multiple lines', function()
+              -- Arrange
+              prepare_line_instance_on_multiple_lines()
+              child.type_keys('ma')
+
+              -- Act
+              child.lua([[L:duplicate()]])
+              local actual = child.grub_marks()
+
+              -- Assert
+              has_mark({'a', 3}, actual)
+            end)
+
+            it('multiple lines with inverted range', function()
+              -- Arrange
+              prepare_line_instance_on_multiple_lines_with_inverted_range()
+              child.type_keys('ma')
+
+              -- Act
+              child.lua([[L:duplicate()]])
+              local actual = child.grub_marks()
+
+              -- Assert
+              has_mark({'a', 1}, actual)
+            end)
+
+            it('multiple lines surrounded by blank ones', function()
+              -- Arrange
+              prepare_line_instance_on_multiple_lines_surrounded_by_blank_ones()
+              child.type_keys('ma')
+
+              -- Act
+              child.lua([[L:duplicate()]])
+              local actual = child.grub_marks()
+
+              -- Assert
+              has_mark({'a', 3}, actual)
+            end)
+
+          end)
+
+          describe('to upward, move relatively', function()
+
+            before_each(function()
+              child.change_config('target = "' .. const.TARGET.src .. '"')
+            end)
+
+            it('single line with no selection', function()
+              -- Arrange
+              prepare_line_instance_on_single_line_with_no_selection()
+              child.type_keys('ma')
+
+              -- Act
+              child.lua([[L:duplicate()]])
+              local actual = child.grub_marks()
+
+              -- Assert
+              has_mark({'a', 2}, actual)
+            end)
+
+            it('single line with selection', function()
+              -- Arrange
+              prepare_line_instance_on_single_line_with_selection()
+              child.type_keys('ma')
+
+              -- Act
+              child.lua([[L:duplicate()]])
+              local actual = child.grub_marks()
+
+              -- Assert
+              has_mark({'a', 2}, actual)
+            end)
+
+            it('multiple lines', function()
+              -- Arrange
+              prepare_line_instance_on_multiple_lines()
+              child.type_keys('ma')
+
+              -- Act
+              child.lua([[L:duplicate()]])
+              local actual = child.grub_marks()
+
+              -- Assert
+              has_mark({'a', 6}, actual)
+            end)
+
+            it('multiple lines with inverted range', function()
+              -- Arrange
+              prepare_line_instance_on_multiple_lines_with_inverted_range()
+              child.type_keys('ma')
+
+              -- Act
+              child.lua([[L:duplicate()]])
+              local actual = child.grub_marks()
+
+              -- Assert
+              has_mark({'a', 4}, actual)
+            end)
+
+            it('multiple lines surrounded by blank ones', function()
+              -- Arrange
+              prepare_line_instance_on_multiple_lines_surrounded_by_blank_ones()
+              child.type_keys('ma')
+
+              -- Act
+              child.lua([[L:duplicate()]])
+              local actual = child.grub_marks()
+
+              -- Assert
+              has_mark({'a', 6}, actual)
+            end)
+
+          end)
+
         end)
 
         -- / Cursor Placement Target

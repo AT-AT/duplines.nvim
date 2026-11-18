@@ -4,6 +4,7 @@ local H = require('specs/helpers')
 local eq, ne = MiniTest.expect.equality, MiniTest.expect.no_equality
 local error, no_error = MiniTest.expect.error, MiniTest.expect.no_error
 local has_no_selection, has_range = H.expect.has_no_selection, H.expect.has_range
+local has_mark = H.expect.has_mark
 local child = H.new_child_neovim('duplines.XXXXX')
 
 -- / Module

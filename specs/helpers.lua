@@ -21,6 +21,7 @@ local Helpers = {}
 ---@field prepare_rows function
 ---@field lines_on function
 ---@field cursor_pos function
+---@field grub_marks function
 ---@field get_visual_pos function
 
 function Helpers.new_child_neovim(path)
@@ -113,6 +114,17 @@ function Helpers.new_child_neovim(path)
     return child.api.nvim_buf_get_lines(0, from, to + 1, true) -- 0-based, end-exclusive
   end
 
+  function child.grub_marks()
+    local marks = child.fn.getmarklist('%')
+    local globals = child.fn.getmarklist()
+
+    for _, v in ipairs(globals) do
+      table.insert(marks, v)
+    end
+
+    return marks
+  end
+
   return child
 end
 
@@ -156,6 +168,24 @@ Helpers.expect.has_range = MiniTest.new_expectation(
   function(expected, actual)
     return string.format(
       'expected: %s\nactual: %s', Helpers.to_string(expected), Helpers.to_string(actual)
+    )
+  end
+)
+
+Helpers.expect.has_mark = MiniTest.new_expectation(
+  'mark existence determination',
+  function(expected, actual)
+    local mark, row = expected[1], expected[2]
+    local matched = vim.tbl_filter(function (value)
+      return value.mark == "'" .. mark and value.pos[2] == row
+    end, actual)
+
+    return vim.tbl_count(matched) == 1
+  end,
+  function(expected, actual)
+    return string.format(
+      'Expected mark (%s, row: %d) does not exist in %s.',
+      expected[1], expected[2], vim.inspect(actual)
     )
   end
 )
