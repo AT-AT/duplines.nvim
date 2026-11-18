@@ -26,17 +26,23 @@ local M = {}
 --  Function (API)
 -- =================================================================================================
 
+--- Setup.
+---
+---@param local_options PluginOptions?
+---
+function M.setup(local_options)
+  config.merge_options(local_options or {})
+end
+
+-- -------------------------------------------------------------------------------------------------
+
+--- Generate a Line class object that performs the duplication process.
+---
 ---@param params PluginOptions?
 ---@return Line
 ---
 function M.line(params)
   return Line.on_range(Range.from_pos(), params or {})
-end
-
----@param local_options PluginOptions?
----
-function M.setup(local_options)
-  config.merge_options(local_options or {})
 end
 
 

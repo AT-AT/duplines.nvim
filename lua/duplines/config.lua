@@ -35,6 +35,8 @@ M.options = vim.tbl_deep_extend('force', {}, M.default_options)
 --  Function (API)
 -- =================================================================================================
 
+--- Merge the specified parameters.
+---
 ---@param local_options PluginOptions?
 ---
 function M.merge_options(local_options)

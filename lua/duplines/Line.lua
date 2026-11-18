@@ -29,6 +29,8 @@ local L = {}
 
 table.unpack = table.unpack or unpack ---@diagnostic disable-line:deprecated
 
+---@type string
+---
 L.keyseq_start_vline_mode = api.nvim_replace_termcodes('<S-V>', true, false, true)
 L.keyseq_mark_begin_selection = api.nvim_replace_termcodes('m<', true, false, true)
 L.keyseq_mark_end_selection = api.nvim_replace_termcodes('m>', true, false, true)
@@ -42,7 +44,10 @@ L.keyseq_esc = api.nvim_replace_termcodes('<Esc>', true, false, true)
 -- / Constructor
 -- -------------------------------------------------------------------------------------------------
 
+--- Constructor.
+---
 ---@private
+---@return Line
 ---
 function Line:new (o)
   o = o or {}
@@ -54,6 +59,8 @@ end
 -- / Class Method
 -- -------------------------------------------------------------------------------------------------
 
+--- Create a Line object for the target range.
+---
 function Line.on_range(range, params)
   params = params or {}
 
@@ -167,6 +174,8 @@ end
 --  Function (Helper)
 -- =================================================================================================
 
+--- Get the current mode.
+---
 ---@private
 ---@return string
 ---
@@ -174,6 +183,8 @@ function L.get_mode()
   return api.nvim_get_mode().mode
 end
 
+--- Determine whether the current mode is Normal mode.
+---
 ---@private
 ---@return boolean
 ---
@@ -181,6 +192,8 @@ function L.is_normal_mode()
   return L.get_mode() == 'n'
 end
 
+--- Determine whether the current mode is V-Line mode.
+---
 ---@private
 ---@return boolean
 ---
@@ -188,6 +201,8 @@ function L.is_v_line_mode()
   return L.get_mode() == 'V'
 end
 
+--- Select by row.
+---
 ---@private
 ---@param on CursorPos
 ---@param range Range
@@ -222,6 +237,8 @@ function L.select_linewise(on, range)
   api.nvim_feedkeys(L.keyseq_mark_end_selection, 'x', false)
 end
 
+--- Send an escape sequence.
+---
 ---@private
 ---
 function L.send_escape()
@@ -229,6 +246,8 @@ function L.send_escape()
   api.nvim_feedkeys(L.keyseq_esc, 'x', false)
 end
 
+--- Set the cursor to the final position.
+---
 ---@private
 ---@param on CursorPos
 ---@param range Range
@@ -247,6 +266,8 @@ function L.set_cursor_to_final_pos(on, range)
   api.nvim_win_set_cursor(0, L.to_cursor_index(cursor_idx))
 end
 
+--- Convert the internal coordinates of a Range object into cursor coordinates.
+---
 ---@private
 ---@param index index_tuple (0,0)-Indexed.
 ---@return integer[] (1,0)-Indexed.
